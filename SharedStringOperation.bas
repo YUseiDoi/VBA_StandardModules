@@ -110,3 +110,15 @@ Public Function RemoveWhiteSpace(ByVal sInput As String) As String
     End If
     RemoveWhiteSpace = sInput
 End Function
+
+'•¶Žš—ñ‚ðˆêŠ‡’uŠ·‚·‚é
+Public Function ReplaceAllTargetStrings(ByVal sInput As String, ByVal sFindText As String, ByVal sReplaceText As String) As String
+    Do While True
+        If InStr(1, sInput, sFindText) > 0 Then
+            sInput = Replace(sInput, sFindText, sReplaceText)
+        Else
+            Exit Do
+        End If
+    Loop
+    ReplaceAllTargetStrings = sInput
+End Function
