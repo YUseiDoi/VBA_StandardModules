@@ -1,4 +1,4 @@
-Attribute VB_Name = "SharedFileOperation"
+Attribute VB_Name = "SM_FileOperation"
 Option Explicit
 
 'ローカルのHTMLファイルをChromeで開く

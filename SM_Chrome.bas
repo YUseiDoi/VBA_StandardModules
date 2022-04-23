@@ -1,7 +1,9 @@
-Attribute VB_Name = "SharedChrome"
+Attribute VB_Name = "SM_Chrome"
 Option Explicit
 
-Enum GetType
+Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As LongPtr)
+
+Public Enum EGetType
     EGT_Unknown = -1
     EGT_ID
     EGT_Class
@@ -12,12 +14,35 @@ Enum GetType
     EGT_XPath
 End Enum
 
+Public Enum EWebElementType
+    EWT_Unknown = -1
+    EWT_WebElement
+    EWT_WebElements
+End Enum
+
 'Chrome
 Public Driver As New ChromeDriver
 
 'Chromeの起動
 Public Function StartChrome()
-    Driver.Start "chrome"
+InitRow:
+    On Error GoTo SkipRow
+        Driver.Start "chrome"
+        Exit Function
+    On Error GoTo 0
+SkipRow:
+    MsgBox "ChromeDriverの自動バージョンアップを実行します"
+    Dim myCChromeDriverUpdate As CChromeDriverUpdate
+    Set myCChromeDriverUpdate = New CChromeDriverUpdate
+    Call KillProcess("chromedriver.exe")        ' Kill all chrome processes
+    On Error GoTo Finish
+        myCChromeDriverUpdate.UpdateDriver Chrome
+    On Error GoTo 0
+    MsgBox "ChromeDriverの自動バージョンアップが完了しました"
+    GoTo InitRow
+Finish:
+    MsgBox "ChromeDriverの自動アップデートに失敗しました" & Chr(10) & "エラーを担当者に報告してください"
+    Call CleanExit
 End Function
 
 'URLのサイトにアクセス
@@ -36,11 +61,12 @@ Public Function WaitChrome(ByVal lTime As Long)
 End Function
 
 'ChromeのWebElement取得まで待機するメソッド
-Public Function Chrome_getElement(ByRef Driver As Selenium.ChromeDriver, ByVal sElementName As String, ByVal sType As GetType, Optional ByVal lWaitTime As String = 20) As WebElement
+Public Function Chrome_getElement(ByRef Driver As Selenium.ChromeDriver, ByVal sElementName As String, ByVal sType As EGetType, Optional ByVal lWaitTime As Long = 20, Optional ByVal bParent As Boolean = False) As WebElement
     '待機時間
     Dim dWaitTime As Date
     '取得したWebElement
     Dim oCurrElement As WebElement
+    Dim myBy As New By
     
     dWaitTime = DateAdd("s", lWaitTime, Now)
     Do
@@ -63,14 +89,18 @@ Public Function Chrome_getElement(ByRef Driver As Selenium.ChromeDriver, ByVal s
         Else
             Set oCurrElement = Nothing
         End If
-    Loop While dWaitTime < Now And oCurrElement Is Nothing
+    Loop While dWaitTime > Now And oCurrElement Is Nothing
+    
+    If bParent Then
+        Set oCurrElement = oCurrElement.FindElement(myBy.XPath(".."))
+    End If
     
     Set Chrome_getElement = oCurrElement
     
 End Function
 
 'ChromeのWebElement取得まで待機するメソッド
-Public Function Chrome_getElements(ByRef Driver As Selenium.ChromeDriver, ByVal sElementName As String, ByVal sType As GetType, Optional ByVal lWaitTime As String = 15) As WebElements
+Public Function Chrome_getElements(ByRef Driver As Selenium.ChromeDriver, ByVal sElementName As String, ByVal sType As EGetType, Optional ByVal lWaitTime As Long = 20) As WebElements
     '待機時間
     Dim dWaitTime As Date
     '取得したWebElement
@@ -98,8 +128,37 @@ Public Function Chrome_getElements(ByRef Driver As Selenium.ChromeDriver, ByVal 
         Else
             Set oCurrElements = Nothing
         End If
-    Loop While dWaitTime < Now And oCurrElements Is Nothing
+    Loop While dWaitTime > Now And oCurrElements Is Nothing
     
     Set Chrome_getElements = oCurrElements
     
+End Function
+
+' 要素を安全にクリックする
+Public Function Chrome_ClickElement(ByRef oWebElement As WebElement, Optional ByVal lTimeOut As Long = 20)
+    '待機時間
+    Dim dWaitTime As Date
+    '取得したWebElement
+    Dim oCurrElements As WebElements
+    
+    dWaitTime = DateAdd("s", lTimeOut, Now)
+    
+    Do
+        On Error Resume Next
+            oWebElement.ScrollIntoView
+            oWebElement.Click
+            Exit Do
+        On Error GoTo 0
+    Loop While dWaitTime > Now
+    
+End Function
+
+' Delay
+Public Function Delay(ByVal lTimeOut As Long)
+        '待機時間
+    Dim dWaitTime As Date
+    dWaitTime = DateAdd("s", lTimeOut, Now)
+    Do
+        DoEvents
+    Loop While dWaitTime > Now
 End Function

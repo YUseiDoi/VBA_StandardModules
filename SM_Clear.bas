@@ -1,4 +1,4 @@
-Attribute VB_Name = "SharedClear"
+Attribute VB_Name = "SM_Clear"
 Option Explicit
 
 '‚«‚ê‚¢‚ÉI—¹‚·‚év1

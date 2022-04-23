@@ -1,4 +1,4 @@
-Attribute VB_Name = "SharedStringOperation"
+Attribute VB_Name = "SM_StringOperation"
 Option Explicit
 
 '半角カナから全角カナに変換
@@ -111,14 +111,23 @@ Public Function RemoveWhiteSpace(ByVal sInput As String) As String
     RemoveWhiteSpace = sInput
 End Function
 
-'文字列を一括置換する
-Public Function ReplaceAllTargetStrings(ByVal sInput As String, ByVal sFindText As String, ByVal sReplaceText As String) As String
-    Do While True
-        If InStr(1, sInput, sFindText) > 0 Then
-            sInput = Replace(sInput, sFindText, sReplaceText)
-        Else
-            Exit Do
-        End If
-    Loop
-    ReplaceAllTargetStrings = sInput
+' 日本語のみを抽出する
+Public Function FindJapaneseRegExp(ByVal sInput As String) As String
+    Dim oRegEx As RegExp
+    Dim vResult As Variant
+    Dim vEachResult As Variant
+    Dim sResult As String
+    Dim i As Long: i = 1
+    Set oRegEx = New RegExp
+    oRegEx.Pattern = "[ぁ-んァ-ヶ一-龠〃々〆〇｡-ﾟ]{1,}"        ' 検索条件＝日本語以外を抽出
+    oRegEx.Global = True        ' 文字列の最後まで検索する
+    If oRegEx.test(sInput) Then
+        Set vResult = oRegEx.Execute(sInput)        '  指定セルの日本語以外を空文字に置き換える
+    End If
+    For Each vEachResult In vResult
+        If i > 1 Then sResult = sResult & ";"
+        sResult = sResult & vEachResult
+        i = i + 1
+    Next
+    FindJapaneseRegExp = sResult
 End Function
