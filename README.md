@@ -1,4 +1,3 @@
-# VBA_SharedModules
+# VBA_StandardModules
 
-These are original Shread Modules in VBA.<br>
-You can use them in a lot of situations.
+These are original Standard Modules in VBA.
