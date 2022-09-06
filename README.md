@@ -1,3 +1,3 @@
 # VBA_StandardModules
 
-These are original Standard Modules in VBA.
+These are Standard Modules in VBA.
